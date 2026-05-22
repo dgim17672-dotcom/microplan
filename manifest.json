@@ -1,0 +1,18 @@
+{
+  "name": "MicroPlan",
+  "short_name": "MicroPlan",
+  "description": "AI Small Space Optimizer - Rearrange & plan your room with AI",
+  "start_url": "/microplan/microplan.html",
+  "display": "standalone",
+  "background_color": "#F0FAFA",
+  "theme_color": "#4ECDC4",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

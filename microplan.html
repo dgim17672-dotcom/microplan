@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MicroPlan - AI Space Optimizer</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mint: #4ECDC4;
+    --mint-light: #A8EDEA;
+    --mint-pale: #E8FAF9;
+    --green: #2ECC71;
+    --green-dark: #27AE60;
+    --navy: #1A2F4A;
+    --navy-light: #2C4A6E;
+    --orange: #FF6B35;
+    --yellow: #FFD93D;
+    --pink: #FF8FA3;
+    --purple: #A78BFA;
+    --bg: #F0FAFA;
+    --white: #FFFFFF;
+    --gray: #6B7280;
+    --gray-light: #F3F4F6;
+    --shadow: 0 8px 32px rgba(78,205,196,0.18);
+    --shadow-card: 0 4px 20px rgba(26,47,74,0.10);
+    --radius: 20px;
+    --radius-sm: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    color: var(--navy);
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #4ECDC4 0%, #2ECC71 100%);
+    padding: 16px 20px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 120px; height: 120px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 50%;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -20px; left: -20px;
+    width: 80px; height: 80px;
+    background: rgba(255,255,255,0.10);
+    border-radius: 50%;
+  }
+  .logo {
+    font-family: 'Nunito', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--navy); }
+  .tagline {
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  .usage-bar {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .usage-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    transition: background 0.3s;
+  }
+  .usage-dot.used { background: white; }
+  .usage-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.8);
+    margin-top: 4px;
+  }
+
+  /* MAIN */
+  .main { padding: 20px 16px 100px; max-width: 480px; margin: 0 auto; }
+
+  /* API KEY */
+  .api-section {
+    background: white;
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-card);
+  }
+  .api-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray);
+  }
+  .api-toggle .icon { font-size: 16px; }
+  .api-input-wrap { margin-top: 10px; display: none; }
+  .api-input-wrap.open { display: block; }
+  .api-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid var(--mint-light);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .api-input:focus { border-color: var(--mint); }
+  .api-note {
+    font-size: 11px;
+    color: var(--gray);
+    margin-top: 6px;
+  }
+  .api-note a { color: var(--mint); }
+
+  /* UPLOAD */
+  .upload-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-card);
+  }
+  .section-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--navy);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .upload-zone {
+    border: 2.5px dashed var(--mint-light);
+    border-radius: var(--radius-sm);
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s;
+    background: var(--mint-pale);
+    position: relative;
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--mint);
+    background: #D4F5F3;
+  }
+  .upload-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .upload-icon { font-size: 36px; margin-bottom: 8px; }
+  .upload-text { font-size: 14px; font-weight: 600; color: var(--navy); }
+  .upload-sub { font-size: 12px; color: var(--gray); margin-top: 4px; }
+
+  .preview-wrap { margin-top: 14px; display: none; }
+  .preview-wrap.show { display: block; }
+  .preview-img {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    max-height: 220px;
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .remove-btn {
+    display: block;
+    margin: 8px auto 0;
+    background: none;
+    border: none;
+    color: var(--gray);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* OPTIONS */
+  .options-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-card);
+  }
+  .check-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 2px solid var(--gray-light);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .check-item:hover { border-color: var(--mint-light); }
+  .check-item.checked {
+    border-color: var(--mint);
+    background: var(--mint-pale);
+    color: var(--navy);
+  }
+  .check-item input { display: none; }
+  .check-item .emoji { font-size: 18px; }
+  .check-text { font-size: 12px; line-height: 1.3; }
+
+  /* BUDGET */
+  .budget-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .budget-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid var(--gray-light);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .budget-input:focus { border-color: var(--mint); }
+  .budget-label { font-size: 13px; font-weight: 600; color: var(--gray); white-space: nowrap; }
+
+  /* LANGUAGE */
+  .lang-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .lang-btn {
+    padding: 6px 14px;
+    border: 2px solid var(--gray-light);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    background: white;
+    transition: all 0.2s;
+    font-family: inherit;
+    color: var(--navy);
+  }
+  .lang-btn.active {
+    border-color: var(--mint);
+    background: var(--mint);
+    color: white;
+  }
+
+  /* ANALYZE BTN */
+  .analyze-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #4ECDC4, #2ECC71);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 16px;
+    font-weight: 800;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    box-shadow: 0 6px 20px rgba(78,205,196,0.4);
+    transition: all 0.25s;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(78,205,196,0.5); }
+  .analyze-btn:active { transform: translateY(0); }
+  .analyze-btn:disabled { background: #C5E8E6; box-shadow: none; cursor: not-allowed; transform: none; }
+
+  /* LOADING */
+  .loading-wrap {
+    display: none;
+    text-align: center;
+    padding: 30px 20px;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    margin-bottom: 16px;
+  }
+  .loading-wrap.show { display: block; }
+  .spinner {
+    width: 48px; height: 48px;
+    border: 4px solid var(--mint-light);
+    border-top-color: var(--mint);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 14px; font-weight: 600; color: var(--navy); }
+  .loading-sub { font-size: 12px; color: var(--gray); margin-top: 4px; }
+
+  /* RESULT */
+  .result-card {
+    display: none;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .result-card.show { display: block; }
+  .result-header {
+    background: linear-gradient(135deg, #4ECDC4, #2ECC71);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .result-header-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: white;
+  }
+
+  /* VIEW TOGGLE */
+  .view-toggle {
+    display: flex;
+    margin: 14px 16px 0;
+    background: var(--gray-light);
+    border-radius: 10px;
+    padding: 4px;
+  }
+  .view-btn {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    background: transparent;
+    color: var(--gray);
+    transition: all 0.2s;
+  }
+  .view-btn.active {
+    background: white;
+    color: var(--navy);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  /* RESULT CONTENT */
+  .result-content { padding: 16px; }
+
+  /* FLOOR PLAN SVG */
+  .floorplan-wrap {
+    background: var(--mint-pale);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .floorplan-svg {
+    width: 100%;
+    max-width: 320px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(78,205,196,0.2);
+  }
+
+  /* SUGGESTION CARDS */
+  .suggestions { display: flex; flex-direction: column; gap: 10px; }
+  .suggestion-item {
+    background: var(--mint-pale);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    border-left: 4px solid var(--mint);
+  }
+  .suggestion-item.free { border-left-color: var(--green); }
+  .suggestion-item.paid { border-left-color: var(--orange); }
+  .suggestion-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+  }
+  .tag-free { background: #D1FAE5; color: var(--green-dark); }
+  .tag-ikea { background: #FEE2E2; color: #DC2626; }
+  .tag-tip { background: #E0F2FE; color: #0369A1; }
+  .suggestion-title { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .suggestion-desc { font-size: 13px; color: var(--gray); line-height: 1.5; }
+
+  /* PRICE BUBBLE */
+  .price-bubble {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--orange);
+    color: white;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-top: 8px;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  /* BULLET LIST */
+  .bullet-list { list-style: none; padding: 0; }
+  .bullet-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gray-light);
+    font-size: 13px;
+    color: var(--navy);
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    line-height: 1.5;
+  }
+  .bullet-list li:last-child { border-bottom: none; }
+  .bullet-list li::before { content: '✦'; color: var(--mint); font-size: 10px; margin-top: 3px; flex-shrink: 0; }
+
+  /* PRO MODAL */
+  .pro-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,47,74,0.5);
+    z-index: 100;
+    backdrop-filter: blur(4px);
+  }
+  .pro-overlay.show { display: flex; align-items: flex-end; }
+  .pro-modal {
+    background: white;
+    border-radius: 28px 28px 0 0;
+    padding: 28px 24px 40px;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .pro-handle { width: 40px; height: 4px; background: var(--gray-light); border-radius: 2px; margin: 0 auto 20px; }
+  .pro-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 24px;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .pro-subtitle { text-align: center; color: var(--gray); font-size: 14px; margin-bottom: 24px; }
+  .pro-features { list-style: none; padding: 0; margin-bottom: 24px; }
+  .pro-features li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    font-size: 14px;
+    font-weight: 500;
+    border-bottom: 1px solid var(--gray-light);
+  }
+  .pro-features li:last-child { border-bottom: none; }
+  .pro-features li .feat-icon { font-size: 20px; }
+  .pro-plans { display: flex; gap: 10px; margin-bottom: 20px; }
+  .pro-plan {
+    flex: 1;
+    border: 2.5px solid var(--gray-light);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .pro-plan.best {
+    border-color: var(--mint);
+    background: var(--mint-pale);
+    position: relative;
+  }
+  .best-badge {
+    position: absolute;
+    top: -10px; left: 50%; transform: translateX(-50%);
+    background: var(--mint);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 10px;
+  }
+  .plan-price {
+    font-family: 'Nunito', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--navy);
+  }
+  .plan-period { font-size: 11px; color: var(--gray); }
+  .plan-desc { font-size: 12px; font-weight: 600; margin-top: 6px; color: var(--navy); }
+  .pro-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #4ECDC4, #2ECC71);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 16px;
+    font-weight: 800;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(78,205,196,0.4);
+  }
+  .pro-close {
+    display: block;
+    text-align: center;
+    margin-top: 12px;
+    color: var(--gray);
+    font-size: 13px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: inherit;
+  }
+
+  /* DISCLAIMER */
+  .disclaimer {
+    background: #FFF8E7;
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 11px;
+    color: #92400E;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    border-left: 3px solid var(--yellow);
+  }
+
+  /* ERROR */
+  .error-box {
+    display: none;
+    background: #FEE2E2;
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    font-size: 13px;
+    color: #DC2626;
+    margin-bottom: 16px;
+    font-weight: 500;
+    border-left: 3px solid #DC2626;
+  }
+  .error-box.show { display: block; }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: white;
+    border-top: 1px solid var(--gray-light);
+    display: flex;
+    padding: 8px 0 12px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+    z-index: 50;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    color: var(--gray);
+    font-size: 10px;
+    font-weight: 600;
+    transition: color 0.2s;
+    border: none;
+    background: none;
+    font-family: inherit;
+    padding: 4px 0;
+  }
+  .nav-item.active { color: var(--mint); }
+  .nav-icon { font-size: 22px; }
+
+  /* ABOUT PANEL */
+  .about-panel {
+    display: none;
+    background: white;
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow-card);
+    margin-bottom: 16px;
+  }
+  .about-panel.show { display: block; }
+  .about-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    margin-bottom: 14px;
+    color: var(--navy);
+  }
+  .about-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    align-items: flex-start;
+    line-height: 1.5;
+  }
+  .about-row .emoji { font-size: 18px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">Micro<span>Plan</span></div>
+  <div class="tagline">🏠 AI Small Space Optimizer</div>
+  <div class="usage-bar" id="usageBar">
+    <div class="usage-dot" id="dot0"></div>
+    <div class="usage-dot" id="dot1"></div>
+    <div class="usage-dot" id="dot2"></div>
+  </div>
+  <div class="usage-label" id="usageLabel">Free: 3 scans/day</div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="mainPanel">
+
+  <!-- API KEY -->
+  <div class="api-section">
+    <div class="api-toggle" onclick="toggleApi()">
+      <span class="icon">🔑</span>
+      <span>Gemini API Key <span id="apiStatus" style="color:var(--green);font-size:11px;"></span></span>
+      <span style="margin-left:auto;font-size:12px;color:var(--mint);" id="apiArrow">▼ Set</span>
+    </div>
+    <div class="api-input-wrap" id="apiWrap">
+      <input type="password" class="api-input" id="apiKey" placeholder="AIza..." oninput="saveApiKey()">
+      <div class="api-note">Get free key at <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a> · Stored locally only</div>
+    </div>
+  </div>
+
+  <!-- UPLOAD -->
+  <div class="upload-card">
+    <div class="section-title">📷 Upload Room Photo</div>
+    <div class="upload-zone" id="uploadZone"
+      ondragover="event.preventDefault();this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="handleDrop(event)">
+      <input type="file" accept="image/*" onchange="handleFile(this.files[0])">
+      <div class="upload-icon">🏠</div>
+      <div class="upload-text">Tap to upload room photo</div>
+      <div class="upload-sub">JPG, PNG · Any room size</div>
+    </div>
+    <div class="preview-wrap" id="previewWrap">
+      <img id="previewImg" class="preview-img" src="" alt="Room preview">
+      <button class="remove-btn" onclick="removePhoto()">✕ Remove photo</button>
+    </div>
+  </div>
+
+  <!-- OPTIONS -->
+  <div class="options-card">
+    <div class="section-title">⚙️ What do you need?</div>
+    <div class="check-grid">
+      <label class="check-item" id="check-rearrange">
+        <input type="checkbox" value="rearrange" onchange="toggleCheck(this,'check-rearrange')">
+        <span class="emoji">🔄</span>
+        <span class="check-text">Free Rearrange<br><small style="color:var(--green);font-weight:700;">No cost!</small></span>
+      </label>
+      <label class="check-item" id="check-storage">
+        <input type="checkbox" value="storage" onchange="toggleCheck(this,'check-storage')">
+        <span class="emoji">📦</span>
+        <span class="check-text">Storage<br>Optimization</span>
+      </label>
+      <label class="check-item" id="check-lighting">
+        <input type="checkbox" value="lighting" onchange="toggleCheck(this,'check-lighting')">
+        <span class="emoji">☀️</span>
+        <span class="check-text">Natural Light<br>Maximize</span>
+      </label>
+      <label class="check-item" id="check-ikea">
+        <input type="checkbox" value="ikea" onchange="toggleCheck(this,'check-ikea')">
+        <span class="emoji">🛒</span>
+        <span class="check-text">Furniture<br>Budget Plan</span>
+      </label>
+    </div>
+
+    <!-- BUDGET -->
+    <div class="budget-row">
+      <span class="budget-label">💰 Budget:</span>
+      <input type="number" class="budget-input" id="budgetInput" placeholder="e.g. 500" min="0">
+      <span class="budget-label">USD</span>
+    </div>
+
+    <!-- LANGUAGE -->
+    <div class="section-title" style="margin-top:14px;">🌍 Language</div>
+    <div class="lang-row" id="langRow">
+      <button class="lang-btn active" onclick="setLang(this,'en')">English</button>
+      <button class="lang-btn" onclick="setLang(this,'ko')">한국어</button>
+      <button class="lang-btn" onclick="setLang(this,'ja')">日本語</button>
+      <button class="lang-btn" onclick="setLang(this,'es')">Español</button>
+      <button class="lang-btn" onclick="setLang(this,'th')">ไทย</button>
+      <button class="lang-btn" onclick="setLang(this,'zh')">中文</button>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-box" id="errorBox"></div>
+
+  <!-- ANALYZE BTN -->
+  <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">
+    <span>✨</span> Analyze My Space
+  </button>
+
+  <!-- LOADING -->
+  <div class="loading-wrap" id="loadingWrap">
+    <div class="spinner"></div>
+    <div class="loading-text">AI is analyzing your room...</div>
+    <div class="loading-sub">⏱️ About 5~15 seconds · Please wait</div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result-card" id="resultCard">
+    <div class="result-header">
+      <span>🏠</span>
+      <div class="result-header-title">Your Space Plan</div>
+      <span style="margin-left:auto;font-size:18px;">✅</span>
+    </div>
+    <div class="view-toggle">
+      <button class="view-btn active" id="viewBtnFloor" onclick="switchView('floor')">📐 Floor Plan</button>
+      <button class="view-btn" id="viewBtnList" onclick="switchView('list')">📋 Key Points</button>
+    </div>
+    <div class="result-content">
+      <div id="viewFloor">
+        <div class="floorplan-wrap" id="floorplanWrap"></div>
+        <div class="suggestions" id="suggestionsFloor"></div>
+      </div>
+      <div id="viewList" style="display:none;">
+        <ul class="bullet-list" id="bulletList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div class="disclaimer">
+    ⚠️ <strong>Disclaimer:</strong> MicroPlan provides AI-generated suggestions for reference only. Actual furniture dimensions, room measurements, and structural elements should be verified before purchase or rearrangement. Results may vary based on photo quality and room conditions.
+  </div>
+
+</div>
+
+<!-- ABOUT PANEL -->
+<div class="main" id="aboutPanel" style="display:none;">
+  <div class="about-panel show">
+    <div class="about-title">About MicroPlan</div>
+    <div class="about-row"><span class="emoji">🏠</span><span>AI-powered small space optimizer for urban living. Perfect for apartments under 35㎡.</span></div>
+    <div class="about-row"><span class="emoji">🆓</span><span><strong>Free:</strong> 3 scans/day · Floor plan illustration · Free rearrange suggestions</span></div>
+    <div class="about-row"><span class="emoji">⭐</span><span><strong>PRO ($3/mo):</strong> 20 scans/day · Detailed furniture plans · Budget breakdown</span></div>
+    <div class="about-row"><span class="emoji">🔑</span><span>Uses your personal Gemini API key — your data stays private</span></div>
+    <div class="about-row"><span class="emoji">🌍</span><span>Available in 6 languages: English, Korean, Japanese, Spanish, Thai, Chinese</span></div>
+    <div class="about-row"><span class="emoji">📧</span><span>Support: dgim17672@gmail.com</span></div>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--gray-light);font-size:11px;color:var(--gray);line-height:1.6;">
+      <strong>Privacy Policy:</strong> MicroPlan does not store your photos or personal data. All analysis is performed via Google Gemini API using your own API key. Photos are processed in real-time and not retained.<br><br>
+      <strong>Terms:</strong> Results are for reference only and have no legal effect. AI analysis may not be 100% accurate.
+    </div>
+
+  </div>
+</div>
+
+<!-- PRO MODAL - hidden for now -->
+      <div class="pro-title">⭐ MicroPlan PRO</div>
+    <div class="pro-subtitle">Unlock full AI space optimization</div>
+    <ul class="pro-features">
+      <li><span class="feat-icon">📐</span> Detailed floor plan with measurements</li>
+      <li><span class="feat-icon">💰</span> Furniture budget breakdown by item</li>
+      <li><span class="feat-icon">🛒</span> IKEA & budget store recommendations</li>
+      <li><span class="feat-icon">📊</span> 20 scans per day (vs 3 free)</li>
+      <li><span class="feat-icon">🌍</span> All 6 languages</li>
+      <li><span class="feat-icon">📩</span> Export results as PDF</li>
+    </ul>
+    <div class="pro-plans">
+      <div class="pro-plan" id="planMonthly" onclick="selectPlan('monthly')">
+        <div class="plan-price">$3</div>
+        <div class="plan-period">per month</div>
+        <div class="plan-desc">Monthly</div>
+      </div>
+      <div class="pro-plan best" id="planYearly" onclick="selectPlan('yearly')">
+        <div class="best-badge">BEST VALUE</div>
+        <div class="plan-price">$30</div>
+        <div class="plan-period">per year</div>
+        <div class="plan-desc">Save $6!</div>
+      </div>
+    </div>
+    <button class="pro-btn" onclick="window.location.href='mailto:dgim17672@gmail.com?subject=MicroPlan PRO&body=I want to upgrade to PRO plan.'">🚀 Start PRO Plan · Contact Us</button>
+    <button class="pro-close" onclick="document.getElementById('proOverlay').classList.remove('show')">Maybe later</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="nav-item active" id="nav-home" onclick="showPanel('home')">
+    <span class="nav-icon">🏠</span>
+    <span>Analyze</span>
+  </button>
+
+  <button class="nav-item" id="nav-about" onclick="showPanel('about')">
+    <span class="nav-icon">ℹ️</span>
+    <span>About</span>
+  </button>
+</div>
+
+<script>
+// ── STATE ──
+let selectedLang = 'en';
+let uploadedFile = null;
+let uploadedBase64 = null;
+let currentView = 'floor';
+let selectedPlan = 'yearly';
+
+// ── USAGE TRACKING ──
+function getToday() { return new Date().toISOString().split('T')[0]; }
+function getUsage() {
+  try {
+    const d = JSON.parse(localStorage.getItem('mp_usage') || '{}');
+    if (d.date !== getToday()) return 0;
+    return d.count || 0;
+  } catch { return 0; }
+}
+function incUsage() {
+  try {
+    const c = getUsage() + 1;
+    localStorage.setItem('mp_usage', JSON.stringify({ date: getToday(), count: c }));
+    updateUsageUI(c);
+  } catch {}
+}
+function updateUsageUI(count) {
+  const c = count ?? getUsage();
+  for (let i = 0; i < 3; i++) {
+    document.getElementById('dot' + i).classList.toggle('used', i < c);
+  }
+  const left = Math.max(0, 3 - c);
+  document.getElementById('usageLabel').textContent = left > 0 ? `Free: ${left} scan${left>1?'s':''} left today` : 'Daily limit reached · Upgrade PRO';
+}
+
+// ── API KEY ──
+function saveApiKey() {
+  const k = document.getElementById('apiKey').value.trim();
+  try { localStorage.setItem('mp_apikey', k); } catch {}
+  document.getElementById('apiStatus').textContent = k ? '✓ Saved' : '';
+}
+function loadApiKey() {
+  try {
+    const k = localStorage.getItem('mp_apikey') || '';
+    document.getElementById('apiKey').value = k;
+    document.getElementById('apiStatus').textContent = k ? '✓ Saved' : '';
+  } catch {}
+}
+function toggleApi() {
+  const w = document.getElementById('apiWrap');
+  const a = document.getElementById('apiArrow');
+  const open = w.classList.toggle('open');
+  a.textContent = open ? '▲ Hide' : '▼ Set';
+}
+
+// ── UPLOAD ──
+function handleFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  uploadedFile = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    uploadedBase64 = e.target.result.split(',')[1];
+    document.getElementById('previewImg').src = e.target.result;
+    document.getElementById('previewWrap').classList.add('show');
+  };
+  reader.readAsDataURL(file);
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f) handleFile(f);
+}
+function removePhoto() {
+  uploadedFile = null;
+  uploadedBase64 = null;
+  document.getElementById('previewWrap').classList.remove('show');
+  document.getElementById('previewImg').src = '';
+}
+
+// ── CHECKS ──
+function toggleCheck(el, id) {
+  document.getElementById(id).classList.toggle('checked', el.checked);
+}
+function getChecked() {
+  return Array.from(document.querySelectorAll('.check-item input:checked')).map(e => e.value);
+}
+
+// ── LANGUAGE ──
+function setLang(btn, lang) {
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedLang = lang;
+}
+
+// ── PLAN ──
+function selectPlan(p) {
+  selectedPlan = p;
+  document.getElementById('planMonthly').style.borderColor = p === 'monthly' ? 'var(--mint)' : 'var(--gray-light)';
+  document.getElementById('planYearly').style.borderColor = p === 'yearly' ? 'var(--mint)' : 'var(--gray-light)';
+}
+
+// ── ANALYZE ──
+async function analyze() {
+  const apiKey = (document.getElementById('apiKey').value || '').trim();
+  if (!apiKey) { showError('Please enter your Gemini API key first.'); toggleApi(); return; }
+  if (!uploadedBase64) { showError('Please upload a room photo first.'); return; }
+
+  const usage = getUsage();
+  if (usage >= 3) { showPro(); return; }
+
+  const checks = getChecked();
+  const budget = document.getElementById('budgetInput').value;
+  const langMap = { en:'English', ko:'Korean', ja:'Japanese', es:'Spanish', th:'Thai', zh:'Chinese' };
+  const lang = langMap[selectedLang] || 'English';
+
+  hideError();
+  setLoading(true);
+  document.getElementById('resultCard').classList.remove('show');
+
+  const checklist = checks.length
+    ? `User selected goals: ${checks.map(c => ({rearrange:'free rearrange (no cost)',storage:'storage optimization',lighting:'natural light maximize',ikea:'furniture budget plan'})[c]).join(', ')}.`
+    : 'General space optimization.';
+  const budgetLine = budget ? `Budget available: $${budget} USD.` : 'No specific budget (focus on free rearrange).';
+
+  const prompt = `You are MicroPlan, an expert small space interior optimizer for urban apartments (under 35㎡).
+
+Analyze this room photo and provide a complete space optimization plan.
+
+${checklist}
+${budgetLine}
+IMPORTANT: Keep ALL JSON keys in English exactly as shown. Only translate the VALUES (text content) into ${lang}. Never translate key names like roomSummary, freeRearrange, title, desc, etc.
+
+Respond ONLY in this exact JSON format (no markdown, no extra text):
+{
+  "roomSummary": "1-2 sentences describing the room",
+  "floorPlanDescription": "describe room shape and furniture positions for SVG (e.g. rectangular room, bed top-left, sofa bottom-center, desk right-side)",
+  "freeRearrange": [
+    {"title": "Action title", "desc": "Specific instruction with no cost", "type": "free"},
+    {"title": "Action title", "desc": "Specific instruction with no cost", "type": "free"}
+  ],
+  "storageIdeas": [
+    {"title": "Storage idea", "desc": "Specific description"}
+  ],
+  "lightingTips": [
+    {"title": "Light tip", "desc": "Specific description"}
+  ],
+  "furnitureSuggestions": [
+    {"title": "Item name", "desc": "Why to buy and where to place", "price": "$XX-$XX", "type": "paid"},
+    {"title": "Item name", "desc": "Why to buy and where to place", "price": "$XX-$XX", "type": "paid"}
+  ],
+  "keyPoints": [
+    "Point 1 in ${lang}",
+    "Point 2 in ${lang}",
+    "Point 3 in ${lang}",
+    "Point 4 in ${lang}",
+    "Point 5 in ${lang}"
+  ],
+  "spaceScore": 72
+}`;
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: prompt },
+            { inline_data: { mime_type: uploadedFile.type, data: uploadedBase64 } }
+          ]
+        }],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 1200 }
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error?.message || 'API error');
+    }
+
+    const data = await res.json();
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    let cleaned = raw.trim();
+    // Robust JSON cleaning
+    if (cleaned.startsWith('```')) {
+      cleaned = cleaned.replace(/^```[\w]*\n?/, '').replace(/```\s*$/, '').trim();
+    }
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('AI가 일시적으로 불안정한 형식을 반환했습니다. 다시 한번 Analyze 버튼을 눌러주세요.');
+    let result;
+    try {
+      result = JSON.parse(jsonMatch[0]);
+    } catch(parseErr) {
+      throw new Error('AI가 일시적으로 불안정한 형식을 반환했습니다. 다시 한번 Analyze 버튼을 눌러주세요.');
+    }
+
+    incUsage();
+    renderResult(result, checks, !!budget);
+  } catch (err) {
+    let msg = err.message || 'Unknown error';
+    if (msg.includes('API_KEY')) msg = 'Invalid API key. Please check your Gemini API key.';
+    if (msg.includes('quota')) msg = 'API quota exceeded. Try again tomorrow or check your Gemini account.';
+    showError('Error: ' + msg);
+  } finally {
+    setLoading(false);
+  }
+}
+
+// ── RENDER ──
+function renderResult(r, checks, hasBudget) {
+  // Floor plan SVG
+  renderFloorPlan(r.floorPlanDescription || '');
+
+  // Suggestions
+  const sugDiv = document.getElementById('suggestionsFloor');
+  sugDiv.innerHTML = '';
+
+  // Room summary
+  if (r.roomSummary) {
+    const s = document.createElement('div');
+    s.className = 'suggestion-item';
+    s.innerHTML = `<span class="suggestion-tag tag-tip">🏠 Room Analysis</span><div class="suggestion-title">Your Space</div><div class="suggestion-desc">${r.roomSummary}</div>`;
+    sugDiv.appendChild(s);
+  }
+
+  // Free rearrange
+  (r.freeRearrange || []).forEach(item => {
+    const s = document.createElement('div');
+    s.className = 'suggestion-item free';
+    s.innerHTML = `<span class="suggestion-tag tag-free">🆓 Free to do</span><div class="suggestion-title">${item.title}</div><div class="suggestion-desc">${item.desc}</div>`;
+    sugDiv.appendChild(s);
+  });
+
+  // Storage
+  if (checks.includes('storage')) {
+    (r.storageIdeas || []).forEach(item => {
+      const s = document.createElement('div');
+      s.className = 'suggestion-item';
+      s.innerHTML = `<span class="suggestion-tag tag-tip">📦 Storage</span><div class="suggestion-title">${item.title}</div><div class="suggestion-desc">${item.desc}</div>`;
+      sugDiv.appendChild(s);
+    });
+  }
+
+  // Lighting
+  if (checks.includes('lighting')) {
+    (r.lightingTips || []).forEach(item => {
+      const s = document.createElement('div');
+      s.className = 'suggestion-item';
+      s.innerHTML = `<span class="suggestion-tag tag-tip">☀️ Lighting</span><div class="suggestion-title">${item.title}</div><div class="suggestion-desc">${item.desc}</div>`;
+      sugDiv.appendChild(s);
+    });
+  }
+
+  // Furniture budget
+  if (checks.includes('ikea') || hasBudget) {
+    (r.furnitureSuggestions || []).forEach(item => {
+      const s = document.createElement('div');
+      s.className = 'suggestion-item paid';
+      s.innerHTML = `<span class="suggestion-tag tag-ikea">🛒 Furniture</span><div class="suggestion-title">${item.title}</div><div class="suggestion-desc">${item.desc}</div>${item.price ? `<div class="price-bubble">💰 ${item.price}</div>` : ''}`;
+      sugDiv.appendChild(s);
+    });
+  }
+
+  // Bullet list
+  const bl = document.getElementById('bulletList');
+  bl.innerHTML = '';
+  (r.keyPoints || []).forEach(p => {
+    const li = document.createElement('li');
+    li.textContent = p;
+    bl.appendChild(li);
+  });
+
+  document.getElementById('resultCard').classList.add('show');
+  document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderFloorPlan(desc) {
+  // Generate a simple illustrative SVG floor plan
+  const svg = `<svg viewBox="0 0 280 220" xmlns="http://www.w3.org/2000/svg" class="floorplan-svg">
+    <defs>
+      <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#B2DFDB" stroke-width="0.5"/>
+      </pattern>
+    </defs>
+    <!-- Room background -->
+    <rect x="20" y="20" width="240" height="180" rx="4" fill="#F0FAFA" stroke="#4ECDC4" stroke-width="2.5"/>
+    <rect x="20" y="20" width="240" height="180" rx="4" fill="url(#grid)"/>
+    <!-- Door -->
+    <path d="M 20 80 Q 50 80 50 110" fill="none" stroke="#4ECDC4" stroke-width="1.5" stroke-dasharray="3,2"/>
+    <rect x="20" y="78" width="3" height="32" fill="#2ECC71"/>
+    <!-- Window top -->
+    <rect x="80" y="20" width="60" height="4" fill="#A8EDEA"/>
+    <line x1="110" y1="20" x2="110" y2="24" stroke="#4ECDC4" stroke-width="1"/>
+    <!-- Bed -->
+    <rect x="30" y="30" width="70" height="55" rx="4" fill="#FECACA" stroke="#F87171" stroke-width="1.5"/>
+    <rect x="30" y="30" width="70" height="18" rx="3" fill="#FCA5A5"/>
+    <circle cx="43" cy="42" r="7" fill="#FBBF24" opacity="0.7"/>
+    <circle cx="87" cy="42" r="7" fill="#FBBF24" opacity="0.7"/>
+    <!-- Desk right -->
+    <rect x="210" y="30" width="45" height="35" rx="3" fill="#BFDBFE" stroke="#60A5FA" stroke-width="1.5"/>
+    <rect x="218" y="36" width="20" height="14" rx="2" fill="#93C5FD"/>
+    <!-- Sofa bottom -->
+    <rect x="60" y="150" width="100" height="38" rx="6" fill="#86EFAC" stroke="#4ADE80" stroke-width="1.5"/>
+    <rect x="60" y="150" width="100" height="14" rx="5" fill="#4ADE80"/>
+    <rect x="60" y="150" width="14" height="38" rx="4" fill="#4ADE80"/>
+    <rect x="146" y="150" width="14" height="38" rx="4" fill="#4ADE80"/>
+    <!-- Table center -->
+    <rect x="115" y="105" width="50" height="35" rx="4" fill="#FDE68A" stroke="#FBBF24" stroke-width="1.5"/>
+    <!-- Plants -->
+    <circle cx="245" cy="175" r="9" fill="#6EE7B7"/>
+    <circle cx="245" cy="173" r="5" fill="#34D399"/>
+    <rect x="242" y="182" width="6" height="8" rx="2" fill="#A78BFA"/>
+    <!-- Space score badge -->
+    <rect x="195" y="100" width="56" height="28" rx="8" fill="#4ECDC4"/>
+    <text x="223" y="112" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="sans-serif">SPACE</text>
+    <text x="223" y="122" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="sans-serif">PLAN ✓</text>
+    <!-- Labels -->
+    <text x="65" y="62" text-anchor="middle" fill="#991B1B" font-size="7" font-family="sans-serif">BED</text>
+    <text x="232" y="52" text-anchor="middle" fill="#1D4ED8" font-size="7" font-family="sans-serif">DESK</text>
+    <text x="110" y="175" text-anchor="middle" fill="#166534" font-size="7" font-family="sans-serif">SOFA</text>
+  </svg>`;
+  document.getElementById('floorplanWrap').innerHTML = svg;
+}
+
+// ── VIEW TOGGLE ──
+function switchView(v) {
+  currentView = v;
+  document.getElementById('viewFloor').style.display = v === 'floor' ? 'block' : 'none';
+  document.getElementById('viewList').style.display = v === 'list' ? 'block' : 'none';
+  document.getElementById('viewBtnFloor').classList.toggle('active', v === 'floor');
+  document.getElementById('viewBtnList').classList.toggle('active', v === 'list');
+}
+
+// ── UI HELPERS ──
+function setLoading(on) {
+  document.getElementById('loadingWrap').classList.toggle('show', on);
+  document.getElementById('analyzeBtn').disabled = on;
+  document.getElementById('analyzeBtn').innerHTML = on ? '<span>⏳</span> Analyzing...' : '<span>✨</span> Analyze My Space';
+}
+function showError(msg) { const b = document.getElementById('errorBox'); b.textContent = msg; b.classList.add('show'); }
+function hideError() { document.getElementById('errorBox').classList.remove('show'); }
+
+// ── PANELS ──
+function showPanel(p) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('nav-' + p)?.classList.add('active');
+  document.getElementById('mainPanel').style.display = p === 'home' ? 'block' : 'none';
+  document.getElementById('aboutPanel').style.display = p === 'about' ? 'block' : 'none';
+}
+
+// ── PRO ──
+function showPro() { document.getElementById('proOverlay').classList.add('show'); }
+function closePro(e) { if (e.target === document.getElementById('proOverlay')) document.getElementById('proOverlay').classList.remove('show'); }
+
+// ── INIT ──
+loadApiKey();
+updateUsageUI();
+// Show API key section open if no key saved
+try {
+  if (!localStorage.getItem('mp_apikey')) {
+    document.getElementById('apiWrap').classList.add('open');
+    document.getElementById('apiArrow').textContent = '▲ Hide';
+  }
+} catch {}
+</script>
+</body>
+</html>
